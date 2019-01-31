@@ -24,6 +24,8 @@
          "df.rkt"
          "spline.rkt")
 
+(require "../al-profiler.rkt")
+
 
 ;;............................................................. best avg ....
 
@@ -255,7 +257,7 @@
 ;; Returns a list of items where each item is a vector of DURATION, VALUE,
 ;; POSITION, this is the position in the data frame where the corresponding
 ;; best interval starts.
-(define (df-mean-max df column
+(define/profile (df-mean-max df column
                      #:inverted? (inverted? #f)
                      #:weight-series [weight "elapsed"]
                      #:durations [durations default-mean-max-durations])

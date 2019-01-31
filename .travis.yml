@@ -63,7 +63,7 @@ script:
   # run trends before the aggregate test, as we want our
   # {BAVG,HIST,SCATTER}_CACHE tables to be empty.
   # - raco test test/trends-test.rkt
-  # - raco test test/aggregate-test.rkt
+  - raco test test/aggregate-test.rkt
   - raco test test/fit-test.rkt
 after_success:
   # If the build succeded, check for unnecessary dependencies on files changed

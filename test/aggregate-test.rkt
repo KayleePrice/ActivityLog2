@@ -1,7 +1,7 @@
 #lang racket/base
 
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2018 Alex Harsányi <AlexHarsanyi@gmail.com>
+;; Copyright (C) 2018, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -25,6 +25,8 @@
          "../rkt/pdmodel.rkt"
          "../rkt/session-df/native-series.rkt"
          "../rkt/utilities.rkt")
+
+(require "../rkt/al-profiler.rkt")
 
 ;;(require rackunit/gui)
 (set-dbglog-to-standard-output #t)     ; send dbglog calls to stdout, so we can see them!
@@ -148,6 +150,8 @@
 (define year 2017)
 
 (module+ test
+  (profile-enable-all #t)
+  (profile-reset-all)
   (if (file-exists? test-database)
       (let ((db (open-activity-log test-database)))
         (when db
@@ -197,4 +201,5 @@
                (check-hist 5 17 year axis)
                (printf "done.~%")
                (flush-output))))))
-      (printf "Could not find ~a, skipping aggregate tests~%" test-database)))
+      (printf "Could not find ~a, skipping aggregate tests~%" test-database))
+  (profile-display)(flush-output))

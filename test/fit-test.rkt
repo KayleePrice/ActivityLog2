@@ -45,8 +45,8 @@
                          #:extra-df-checks (extra-df-checks #f))
   (when (file-exists? file)
     (define start (current-milliseconds))
-    (profile-enable-all #t)
-    (profile-reset-all)
+    ;; (profile-enable-all #t)
+    ;; (profile-reset-all)
     (printf "File ~a, ~a data-points ..." file row-count)(flush-output)
     ;; Simple consistency check: if we expect more than one session,
     ;; SERIES-COUNT and ROW-COUNT should be lists, one for each series.
@@ -68,13 +68,14 @@
          #:delete-sessions? #t)))
     (define elapsed (/ (- (current-milliseconds) start) 1000.0))
     (printf " done in ~a seconds ~%" (~r elapsed #:precision 2))(flush-output)
-    (profile-display)(flush-output)))
+    ;;(profile-display)(flush-output)
+    ))
 
 (define (do-multi-checks files
                          #:extra-db-checks (extra-db-checks #f))
   (when (for/and ([f (in-list files)]) (file-exists? f))
-    (profile-enable-all #t)
-    (profile-reset-all)
+    ;; (profile-enable-all #t)
+    ;; (profile-reset-all)
     (printf "File multi-checks on ~a ..." files)(flush-output)
     (define start (current-milliseconds))
     (with-fresh-database
@@ -85,7 +86,8 @@
           (extra-db-checks db))))
     (define elapsed (/ (- (current-milliseconds) start) 1000.0))
     (printf " done in ~a seconds ~%" (~r elapsed #:precision 2))(flush-output)
-    (profile-display)(flush-output)))
+    ;;(profile-display)(flush-output)
+    ))
 
 (define (check-run-power df)
   (when (equal? (df-get-property df 'sport #f) #(1 #f))
@@ -309,4 +311,7 @@ select count(*)
 
 (module+ test
   (require rackunit/text-ui)
-  (run-tests fit-files-test-suite 'verbose))
+  (profile-enable-all #t)
+  (profile-reset-all)
+  (run-tests fit-files-test-suite 'verbose)
+  (profile-display)(flush-output))

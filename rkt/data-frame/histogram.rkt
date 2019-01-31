@@ -2,7 +2,7 @@
 ;; histogram.rkt -- histograms and histogram plots for data frames
 ;;
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2018 Alex Harsányi <AlexHarsanyi@gmail.com>
+;; Copyright (C) 2018, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -23,6 +23,8 @@
          "df.rkt"
          "exn.rkt"
          "statistics.rkt")
+
+(require "../al-profiler.rkt")
 
 ;; Return a hash table mapping each sample in the data-frame% DF SERIES to the
 ;; number of times it appears in the series.  If WEIGHT is not #f, this is
@@ -170,7 +172,7 @@
 ;; sorted.  In addition, if the samples are numbers, empty slots will be
 ;; created so that the buckets are also consecutive.
 ;;
-(define (df-histogram df series
+(define/profile (df-histogram df series
                       #:weight-series [weight (df-get-default-weight-series df)]
                       #:bucket-width [bwidth 1]
                       #:trim-outliers [trim #f]
