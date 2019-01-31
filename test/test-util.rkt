@@ -1,7 +1,7 @@
 #lang racket/base
 
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2018 Alex Harsányi <AlexHarsanyi@gmail.com>
+;; Copyright (C) 2018, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,8 @@
          ;; unless this module is required somewhere...
          "../rkt/session-df/native-series.rkt")
 
+(require "../rkt/al-profiler.rkt")
+
 (define (with-fresh-database thunk)
   (let ((db (open-activity-log 'memory)))
     (set-current-database db)
@@ -52,7 +54,7 @@
   (query-list db "select id from A_SESSION where activity_id = ?" aid))
 
 ;; Do some basic checks on the session data frame
-(define (check-session-df df
+(define/profile (check-session-df df
                           #:expected-row-count (rc #f)
                           #:expected-series-count (sc #f))
   (define nitems (df-row-count df))

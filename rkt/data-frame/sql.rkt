@@ -2,7 +2,7 @@
 ;; sql.rkt -- read data frames from SQL queries
 ;;
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2018 Alex Harsányi <AlexHarsanyi@gmail.com>
+;; Copyright (C) 2018, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -19,11 +19,13 @@
          "df.rkt"
          "series.rkt")
 
+(require "../al-profiler.rkt")
+
 ;; Create a data frame from the result of running SQL-QUERY on the database DB
 ;; with the supplied PARAMS.  SQL-QUERY can be either a string or a
 ;; virtual-query object.  Each column from the result set will become a series
 ;; in the data frame, sql-null values will be converted to #f.
-(define (df-read/sql db sql-query . params)
+(define/profile (df-read/sql db sql-query . params)
   (define result (apply query db sql-query params))
   (define headers
     (for/list ([hdr (rows-result-headers result)])

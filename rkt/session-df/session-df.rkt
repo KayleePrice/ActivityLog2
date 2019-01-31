@@ -46,6 +46,8 @@
          "xdata-series.rkt"
          "../gap.rkt")
 
+(require "../al-profiler.rkt")
+
 (define y-range/c (cons/c (or/c #f number?) (or/c #f number?)))
 (define color/c (or/c (is-a?/c color%) (list/c real? real? real?)))
 (define factor-colors/c (listof (cons/c symbol? color/c)))
@@ -100,7 +102,7 @@
 ;; Create a data-frame% from the session's trackpoints.  Some data series come
 ;; from the database (e.g. heart rate), some are calculated (e.g. heart rate
 ;; zone).  See also `session-df`, which is the function you want to use.
-(define (make-session-data-frame db session-id)
+(define/profile (make-session-data-frame db session-id)
 
   (define sport
     (let ([row (query-maybe-row db (fetch-sport) session-id)])

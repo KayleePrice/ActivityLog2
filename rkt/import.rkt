@@ -2,7 +2,7 @@
 ;; import.rkt -- import acivities into the database
 ;;
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2015 Alex Harsanyi (AlexHarsanyi@gmail.com)
+;; Copyright (C) 2015, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,8 @@
          "time-in-zone.rkt"
          "weather.rkt")
 
+(require "al-profiler.rkt")
+
 (provide import-new-activities-from-directory do-post-import-tasks)
 
 (define (import-new-activities-from-directory dir db [file-callback #f] [global-callback #f])
@@ -39,7 +41,7 @@
 
 ;; Perform database maintenance tasks after an import.  `global-callback' will
 ;; be used to report progress.
-(define (do-post-import-tasks db [global-callback #f])
+(define/profile (do-post-import-tasks db [global-callback #f])
   (define (show-progress msg)
     (dbglog msg)
     (when global-callback (global-callback msg)))

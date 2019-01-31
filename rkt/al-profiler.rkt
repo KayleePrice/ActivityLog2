@@ -2,7 +2,7 @@
 ;; al-profiler.rkt -- profiling and tracing capabilities
 ;;
 ;; This file is part of ActivityLog2, an fitness activity tracker
-;; Copyright (C) 2016 Alex Harsanyi (AlexHarsanyi@gmail.com)
+;; Copyright (C) 2016, 2019 Alex Harsányi <AlexHarsanyi@gmail.com>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the Free
@@ -49,7 +49,6 @@
 ;; Holds timing information about a profiled function.
 (struct profile-data (name
                       (enabled #:mutable)
-                      (ncalls #:mutable)
                       (stats #:mutable))
   #:transparent)
 
@@ -58,7 +57,7 @@
 (define profile-db (make-hash))
 
 (define (make-profile-data name)
-  (let ((data (profile-data name #t 0 empty-statistics)))
+  (let ((data (profile-data name #t empty-statistics)))
     (hash-set! profile-db name data)
     data))
 
@@ -107,8 +106,8 @@
              (stats (profile-data-stats data)))
         (fprintf port "~a: ~a ~a ~a ~a ~a ~a~%"
                  (~a n #:min-width maxw)
-                 (~r (profile-data-ncalls data) #:min-width 5)
-                 (pval (* (profile-data-ncalls data)
+                 (~r (statistics-count stats) #:min-width 5)
+                 (pval (* (statistics-count stats)
                           (statistics-mean stats)))
                  (pval (statistics-min stats))
                  (pval (statistics-max stats))
@@ -130,9 +129,6 @@
                (let () body ...)
              (let ((end (current-inexact-milliseconds)))
                (when (profile-data-enabled pdata)
-                 (set-profile-data-ncalls!
-                  pdata
-                  (add1 (profile-data-ncalls pdata)))
                  (set-profile-data-stats!
                   pdata
                   (update-statistics (profile-data-stats pdata) (- end start)))))))))]))

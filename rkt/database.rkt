@@ -34,6 +34,8 @@
          "utilities.rkt"
          )
 
+(require "al-profiler.rkt")
+
 (provide db-import-activity-from-file)
 (provide db-import-activities-from-directory)
 (provide db-re-import-activity)
@@ -85,27 +87,28 @@
 
 (define xdata-fields (make-parameter #f))
 
-(define db-insert-activity
-  (let ((stmt (virtual-statement
-               (lambda (dbsys)
-                 "insert into ACTIVITY(start_time, guid) values (?, ?)"))))
-    (lambda (activity db)
-      (call-with-transaction
-       db
-       (lambda ()
-         (let ((start-time (dict-ref activity 'start-time #f))
-               (guid (dict-ref activity 'guid #f)))
-           (query-exec db stmt start-time (or guid sql-null))
-           (define apps (xdata-synx-applications db activity))
-           (define fields (xdata-sync-fields db activity apps))
-           (parameterize ([xdata-fields fields])
-             (let ((activity-id (db-get-last-pk "ACTIVITY" db))
-                   (sessions (assq 'sessions activity)))
-               (when sessions
-                 (for-each (lambda (session)
-                             (db-insert-session session activity-id db))
-                           (cdr sessions)))
-               activity-id))))))))
+(define stmt
+  (virtual-statement
+   (lambda (dbsys)
+     "insert into ACTIVITY(start_time, guid) values (?, ?)")))
+
+(define/profile (db-insert-activity activity db)
+  (call-with-transaction
+   db
+   (lambda ()
+     (let ((start-time (dict-ref activity 'start-time #f))
+           (guid (dict-ref activity 'guid #f)))
+       (query-exec db stmt start-time (or guid sql-null))
+       (define apps (xdata-synx-applications db activity))
+       (define fields (xdata-sync-fields db activity apps))
+       (parameterize ([xdata-fields fields])
+         (let ((activity-id (db-get-last-pk "ACTIVITY" db))
+               (sessions (assq 'sessions activity)))
+           (when sessions
+             (for-each (lambda (session)
+                         (db-insert-session session activity-id db))
+                       (cdr sessions)))
+           activity-id))))))
 
 (define db-insert-section-summary
   (let ((stmt (virtual-statement
@@ -540,16 +543,17 @@
 
 ;.......................................... db-insert-activtiy-raw-data ....
 
-(define  db-insert-activity-raw-data
-  (let ((stmt (virtual-statement
-               (lambda (dbsys)
-                "insert into ACTIVITY_RAW_DATA (activity_id, file_name, data)
-                 values(?, ?, ?)"))))
-    (lambda (activity-id file-name data db)
-      (let ((in (open-input-bytes data))
-            (out (open-output-bytes)))
-        (gzip-through-ports in out file-name 0)
-        (query-exec db stmt activity-id file-name (get-output-bytes out))))))
+(define stmt1
+  (virtual-statement
+   (lambda (dbsys)
+     "insert into ACTIVITY_RAW_DATA (activity_id, file_name, data)
+                 values(?, ?, ?)")))
+
+(define/profile (db-insert-activity-raw-data activity-id file-name data db)
+  (let ((in (open-input-bytes data))
+        (out (open-output-bytes)))
+    (gzip-through-ports in out file-name 0)
+    (query-exec db stmt1 activity-id file-name (get-output-bytes out))))
 
 
 ;................................................... db-import-activity ....
@@ -580,7 +584,7 @@
               (raise (db-exn-retired-device serial)))))))))
 
 
-(define (db-import-activity-from-blob data file-name db)
+(define/profile (db-import-activity-from-blob data file-name db)
   ;; NOTE: call with transaction will only intercept SQL exceptions and roll
   ;; back.  It look like any other exception will cause the block to be
   ;; escaped and transaction left open.
