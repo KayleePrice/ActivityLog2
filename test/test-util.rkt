@@ -42,6 +42,13 @@
 (define (with-database path thunk)
   (let ((db (open-activity-log path)))
     (set-current-database db)
+
+    ;; Clear these out, we want the tests to actually process the data, not
+    ;; just fetch and aggregate pre-calculated values.
+    (query-exec db "delete from BAVG_CACHE")
+    (query-exec db "delete from HIST_CACHE")
+    (query-exec db "delete from SCATTER_CACHE")
+
     (dynamic-wind
       (lambda () (void))
       ;; NOTE: cannot really catch errors as error trace will loose context

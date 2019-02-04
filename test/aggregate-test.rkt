@@ -19,6 +19,7 @@
          racket/format
          racket/class
          rackunit
+         db
          "../rkt/bavg-util.rkt"
          "../rkt/dbapp.rkt"
          "../rkt/metrics.rkt"
@@ -156,6 +157,13 @@
       (let ((db (open-activity-log test-database)))
         (when db
           (set-current-database db)
+
+          ;; Clear these out, we want the tests to actually process the data,
+          ;; not just fetch and aggregate pre-calculated values.
+          (query-exec db "delete from BAVG_CACHE")
+          (query-exec db "delete from HIST_CACHE")
+          (query-exec db "delete from SCATTER_CACHE")
+
           (for ((axis (in-list test-axis-run)))
             (check-not-exn
              (lambda ()
