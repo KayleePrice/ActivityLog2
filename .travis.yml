@@ -41,6 +41,8 @@ matrix:
     - env: RACKET_VERSION=HEADCS
     - env: RACKET_VERSION=RELEASE
   fast_finish: true
+services:
+  - xvfb
 before_install:
   - bash ./etc/scripts/install-racket.sh
   - export PATH="${RACKET_DIR}/bin:${PATH}"
@@ -51,7 +53,7 @@ before_script:
   # actually opened.  It takes a short while for the xvfb to start, but since
   # it is only needed after the build, we don't sleep here (the download test
   # data + build take about 6 minutes currently).
-  - bash -e /etc/init.d/xvfb start
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16
   - bash ./etc/scripts/fetch.sh -C test "1l-COKZ8pMef4JUX6E7HBVEEYMAYO2Noo" # test-db
   - bash ./etc/scripts/fetch.sh -C test "1s5de2Ij8Q-E7fDOwKzj0AB9CU5e3wWXY" # test-fit
 script:
