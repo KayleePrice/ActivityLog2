@@ -36,6 +36,7 @@ env:
     - RACKET_VERSION=7.3
     - RACKET_VERSION=7.4
     - RACKET_VERSION=7.4-cs
+    - RACKET_VERSION=HEAD
     - RACKET_VERSION=HEADCS
 matrix:
   allow_failures:
