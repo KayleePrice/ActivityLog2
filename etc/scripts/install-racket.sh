@@ -8,7 +8,8 @@ set -e
 SCRIPT_NAME=${0##**/}
 
 # These variables can be set in the .travis.yml file, but we provide suitable
-# defaults.
+# defaults.  NOTE that you can specify Chez versions by appending a -cs to the
+# version, e.g. 7.4-cs.
 RACKET_DIR=${RACKET_DIR:=~/racket}
 RACKET_VERSION=${RACKET_VERSION:=7.1}
 RACKET_MINIMAL=${RACKET_MINIMAL:=0}
@@ -18,7 +19,9 @@ BASE="https://mirror.racket-lang.org/installers"
 HBASE="https://plt.eecs.northwestern.edu/snapshots/current/installers"
 PBASE="https://pre-release.racket-lang.org/installers"
 CBASE="https://www.cs.utah.edu/plt/snapshots/current/installers" # Racket on Chez Scheme
-V=$RACKET_VERSION
+
+# Strip off CS suffix from the version
+V=`echo $RACKET_VERSION | sed s/-cs$//`
 [[ "$RACKET_MINIMAL" = "1" ]] && M="minimal-" || M=""
 
 case "$RACKET_VERSION" in
@@ -41,6 +44,10 @@ case "$RACKET_VERSION" in
         ;;
     6.[0-4] | 6.[0-4].[0-9])
         URL="${BASE}/${V}/racket-${M}${V}-x86_64-linux-ubuntu-precise.sh"
+        ;;
+    7.*-cs)
+        # NOTE: 7.4 is the first version which has a Chez variant
+        URL="${BASE}/${V}/racket-${M}${V}-x86_64-linux-cs.sh"
         ;;
     6.* | 7.*)
         URL="${BASE}/${V}/racket-${M}${V}-x86_64-linux.sh"
