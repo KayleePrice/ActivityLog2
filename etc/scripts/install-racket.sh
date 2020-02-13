@@ -27,9 +27,9 @@ V=`echo $RACKET_VERSION | sed s/-cs$//`
 case "$RACKET_VERSION" in
     HEAD)
         if [[ "$RACKET_MINIMAL" = "1" ]]; then
-            URL="${HBASE}/min-racket-current-x86_64-linux-precise.sh"
+            URL="${CBASE}/min-racket-current-x86_64-linux-precise.sh"
         else
-            URL="${HBASE}/racket-test-current-x86_64-linux-precise.sh"
+            URL="${CBASE}/racket-current-x86_64-linux-precise.sh"
         fi
         ;;
     HEADCS)
