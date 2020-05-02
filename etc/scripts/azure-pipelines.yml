@@ -9,8 +9,15 @@ jobs:
       vmImage: 'Ubuntu-18.04'
 
     variables:
-      RACKET_VERSION: 7.5
       RACKET_DIR: $(Agent.BuildDirectory)/racket
+
+    strategy:
+      maxParallel: 2
+      matrix:
+        Racket_7_7:
+          RACKET_VERSION: 7.7
+        Raclet_7_7_cs:
+          RACKET_VERSION: 7.7-cs
 
     steps:
     - script: |
@@ -20,66 +27,66 @@ jobs:
 
     - template: azure-common.yml
 
-  - job: Windows
-    pool:
-      vmImage: 'windows-2019'
+  # - job: Windows
+  #   pool:
+  #     vmImage: 'windows-2019'
 
-    variables:
-      RACKET_VERSION: 7.5
-      RACKET_DIR: 'C:/Program Files/Racket'
+  #   variables:
+  #     RACKET_VERSION: 7.5
+  #     RACKET_DIR: 'C:/Program Files/Racket'
 
-    steps:
-    - powershell: |
-        .\etc\scripts\install-racket.ps1
-        Write-Host "##vso[task.setvariable variable=path]$Env:PATH;$Env:RACKET_DIR"
-      displayName: Install Racket $(RACKET_VERSION)
+  #   steps:
+  #   - powershell: |
+  #       .\etc\scripts\install-racket.ps1
+  #       Write-Host "##vso[task.setvariable variable=path]$Env:PATH;$Env:RACKET_DIR"
+  #     displayName: Install Racket $(RACKET_VERSION)
 
-    - template: azure-common.yml
+  #   - template: azure-common.yml
 
-    # It appears that the download happens early in the build pipeline, before
-    # even the source is checked out, regardless of the position of the
-    # dowload secure file task in the file...
+  #   # It appears that the download happens early in the build pipeline, before
+  #   # even the source is checked out, regardless of the position of the
+  #   # dowload secure file task in the file...
 
-    - task: DownloadSecureFile@1
-      inputs:
-        secureFile: al2_sign_pub.asc
+  #   - task: DownloadSecureFile@1
+  #     inputs:
+  #       secureFile: al2_sign_pub.asc
 
-    - task: DownloadSecureFile@1
-      inputs:
-        secureFile: al2_sign_sec.bin
+  #   - task: DownloadSecureFile@1
+  #     inputs:
+  #       secureFile: al2_sign_sec.bin
 
-    - powershell: |
-        .\etc\scripts\install-inno-setup.ps1
-        Write-Host "##vso[task.setvariable variable=path]$Env:PATH;$Env:LOCALAPPDATA\Inno Setup 6"
-      displayName: Install InnoSetup
+  #   - powershell: |
+  #       .\etc\scripts\install-inno-setup.ps1
+  #       Write-Host "##vso[task.setvariable variable=path]$Env:PATH;$Env:LOCALAPPDATA\Inno Setup 6"
+  #     displayName: Install InnoSetup
 
-    # Update the version, product name and description in the resulting
-    # executable using verpatch.exe, than create an installer using Inno
-    # Setup.  The script below reads the version from version.txt, and it is
-    # important that the first line in that file contains no spaces.  Note
-    # that this should be in a separate script...
+  #   # Update the version, product name and description in the resulting
+  #   # executable using verpatch.exe, than create an installer using Inno
+  #   # Setup.  The script below reads the version from version.txt, and it is
+  #   # important that the first line in that file contains no spaces.  Note
+  #   # that this should be in a separate script...
 
-    - script: |
-        set /p APP_VERSION=<version.txt
-        set V=%APP_VERSION%.%BUILD_BUILDID%
-        set D=ActivityLog2 - Analyze Swim Bike and Run Data
-        set P=ActivityLog2
-        etc\scripts\verpatch .\dist\ActivityLog2.exe %V% /s desc "%D%" /s product %P% /pv %V%
-        iscc /DMyAppVersion=%V% etc\scripts\install.iss
-      displayName: Creating Installer
+  #   - script: |
+  #       set /p APP_VERSION=<version.txt
+  #       set V=%APP_VERSION%.%BUILD_BUILDID%
+  #       set D=ActivityLog2 - Analyze Swim Bike and Run Data
+  #       set P=ActivityLog2
+  #       etc\scripts\verpatch .\dist\ActivityLog2.exe %V% /s desc "%D%" /s product %P% /pv %V%
+  #       iscc /DMyAppVersion=%V% etc\scripts\install.iss
+  #     displayName: Creating Installer
 
-    - bash: |
-        bash ./etc/scripts/sign-release.sh
-      displayName: (Maybe) Sign Installer
+  #   - bash: |
+  #       bash ./etc/scripts/sign-release.sh
+  #     displayName: (Maybe) Sign Installer
 
-    - task: CopyFiles@2
-      inputs:
-        targetFolder: $(Build.ArtifactStagingDirectory)
-        contents: ActivityLog2Setup-*.*
-      displayName: Move Installer Files to Staging Area
+  #   - task: CopyFiles@2
+  #     inputs:
+  #       targetFolder: $(Build.ArtifactStagingDirectory)
+  #       contents: ActivityLog2Setup-*.*
+  #     displayName: Move Installer Files to Staging Area
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        artifactName: ActivityLog2Setup
-      displayName: Publish Installer Artifacts
+  #   - task: PublishBuildArtifacts@1
+  #     inputs:
+  #       pathToPublish: $(Build.ArtifactStagingDirectory)
+  #       artifactName: ActivityLog2Setup
+  #     displayName: Publish Installer Artifacts
