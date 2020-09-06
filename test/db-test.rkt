@@ -107,6 +107,15 @@ select count(*)
         or position_long is not null)")))
     (check = 0 cnt "Missing tile codes from A_TRACKPOINT")))
 
+(define (db-check-geoids db)
+  (let ((cnt (query-value db "
+select count(*)
+  from A_TRACKPOINT
+ where geoid is null
+   and (position_lat is not null
+        or position_long is not null)")))
+    (check = 0 cnt "Missing geoids from A_TRACKPOINT")))
+
 ;; Store a new set of sport zones in the database for SPORT/SUB-SPORT and the
 ;; ZONE-METRIC.
 ;;
@@ -608,7 +617,8 @@ where S.id = CPFS.session_id
               (update-some-session-metrics sid db)
               (check-time-in-zone df db file)))
            (check = 1 (activity-count db))
-           (db-check-tile-code db)))))
+           (db-check-tile-code db)
+           (db-check-geoids db)))))
 
    (test-case "Subsequent imports"
      (with-fresh-database
