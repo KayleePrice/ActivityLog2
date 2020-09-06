@@ -274,7 +274,7 @@
                    left_pedal_smoothness, right_pedal_smoothness,
                    left_pco, right_pco, left_pp_start, left_pp_end, right_pp_start, right_pp_end,
                    left_ppp_start, left_ppp_end, right_ppp_start, right_ppp_end, tile_code, geoid)
-                 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
+                 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")))
         (fields
          `(timestamp position-lat position-long altitude distance cadence
                      speed heart-rate vertical-oscillation
