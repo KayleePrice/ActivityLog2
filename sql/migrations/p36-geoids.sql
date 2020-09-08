@@ -25,4 +25,8 @@ alter table A_TRACKPOINT
 create index IX2_A_TRACKPOINT
   on A_TRACKPOINT(geoid, altitude, timestamp);
 
+-- Improve speed of heat map queries
+create index IX3_A_TRACKPOINT
+  on A_TRACKPOINT(length_id, geoid);
+
 update SCHEMA_VERSION set version = 36;
